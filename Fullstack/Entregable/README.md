@@ -48,7 +48,7 @@ Sistema integral de gestión farmacéutica desarrollado con tecnologías moderna
 
 ### 1. Clonación del Repositorio
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/wonderlord007/Entregables-.git
 cd EJEMPLONODEJS
 ```
 
@@ -174,7 +174,7 @@ POST /api/ventas
 ## Arquitectura del Sistema
 
 ```
-EJEMPLONODEJS/
+Entregable/
 ├── config/
 │   └── db.js                 # Configuración de conexión a base de datos
 ├── controllers/
