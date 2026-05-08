@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Botica Nova Salud</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .card-header {
+            background: linear-gradient(45deg, #1976d2, #42a5f5);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #1976d2, #42a5f5);
+            border: none;
+        }
+        .btn-success {
+            background: linear-gradient(45deg, #388e3c, #4caf50);
+            border: none;
+        }
+        .alert-warning {
+            background: linear-gradient(45deg, #f57c00, #ff9800);
+            color: white;
+            border: none;
+        }
+        h1 {
+            color: #1565c0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .form-check-input:checked {
+            background-color: #1976d2;
+            border-color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="auth-section">
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="text-center">Iniciar Sesión</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-login">
+                                <div class="mb-3">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" id="login-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Contraseña</label>
+                                    <input type="password" class="form-control" id="login-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                            </form>
+                            <hr>
+                            <p class="text-center mb-0">
+                                <button class="btn btn-link" onclick="mostrarRegistro()">¿No tienes cuenta? Regístrate</button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center mb-4" id="registro-container" style="display: none;">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="text-center">Registro de Usuario</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-registro">
+                                <div class="mb-3">
+                                    <label>Email</label>
+                                    <input type="email" class="form-control" id="registro-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Contraseña</label>
+                                    <input type="password" class="form-control" id="registro-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">Registrarse</button>
+                            </form>
+                            <hr>
+                            <p class="text-center mb-0">
+                                <button class="btn btn-link" onclick="mostrarLogin()">¿Ya tienes cuenta? Inicia sesión</button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="app-content" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-center mb-0">Sistema de Gestion - Botica Nova Salud</h1>
+                <button class="btn btn-outline-danger" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+        <div id="alertas" class="alert alert-warning d-none">
+            <h5>Productos con Stock Bajo</h5>
+            <ul id="lista-alertas"></ul>
+        </div>
+
+        <div class="row">
+            <!-- Inventario -->
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Inventario de Productos</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalProducto">Nuevo Producto</button>
+                        <div id="productos" class="row"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Venta -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Registrar Venta</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="productos-venta" class="mb-3"></div>
+                        <button type="button" id="btn-procesar-venta" class="btn btn-success w-100">Procesar Venta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar Producto -->
+    <div class="modal fade" id="modalProducto" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-producto">
+                        <div class="mb-3">
+                            <label>Nombre</label>
+                            <input type="text" class="form-control" id="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Descripción</label>
+                            <input type="text" class="form-control" id="descripcion">
+                        </div>
+                        <div class="mb-3">
+                            <label>Precio</label>
+                            <input type="number" class="form-control" id="precio" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Stock Actual</label>
+                            <input type="number" class="form-control" id="stock_actual" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Stock Mínimo</label>
+                            <input type="number" class="form-control" id="stock_minimo" min="0" required>
+                        </div>
+                        <input type="hidden" id="producto_id">
+                        <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Historial de Ventas</h5>
+                </div>
+                <div class="card-body">
+                    <div id="ventas-historial">
+                        <p class="text-muted">Cargando historial...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let authToken = localStorage.getItem('authToken');
+
+        // Verificar si ya está autenticado
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                mostrarApp();
+            } else {
+                mostrarAuth();
+            }
+        });
+
+        function mostrarAuth() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('app-content').style.display = 'none';
+        }
+
+        function mostrarApp() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            cargarProductos();
+            cargarAlertas();
+            cargarVentas();
+        }
+
+        function mostrarRegistro() {
+            document.getElementById('registro-container').style.display = 'block';
+            document.querySelector('#auth-section .card').style.display = 'none';
+        }
+
+        function mostrarLogin() {
+            document.getElementById('registro-container').style.display = 'none';
+            document.querySelector('#auth-section .card').style.display = 'block';
+        }
+
+        // Login
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    mostrarApp();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || 'Credenciales incorrectas'));
+                }
+            } catch (error) {
+                console.error('Error en login:', error);
+                alert('Error al iniciar sesión');
+            }
+        });
+
+        // Registro
+        document.getElementById('form-registro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('registro-email').value;
+            const password = document.getElementById('registro-password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    alert('Usuario registrado exitosamente. Ahora puedes iniciar sesión.');
+                    mostrarLogin();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || error.message || 'No se pudo registrar'));
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                alert('Error al registrar usuario');
+            }
+        });
+
+        async function cargarProductos() {
+            try {
+                const response = await fetch(`${API_BASE}/productos`);
+                const productos = await response.json();
+                mostrarProductos(productos);
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        function mostrarProductos(productos) {
+            const container = document.getElementById('productos');
+            container.innerHTML = '';
+            productos.forEach(producto => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-3';
+                col.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">${producto.nombre}</h6>
+                            <p class="card-text text-muted small">${producto.descripcion || 'Sin descripción'}</p>
+                            <p class="card-text fw-bold">S/ ${producto.precio}</p>
+                            <p class="card-text small">Stock: ${producto.stock_actual}</p>
+                            <div class="d-flex justify-content-center gap-2 mt-3">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="editarProducto('${producto._id}')">Editar</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarProducto('${producto._id}')">Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+            mostrarProductosVenta(productos);
+        }
+
+        async function cargarVentas() {
+            try {
+                const response = await fetch(`${API_BASE}/ventas`);
+                const ventas = await response.json();
+                mostrarVentas(ventas);
+            } catch (error) {
+                console.error('Error cargando ventas:', error);
+            }
+        }
+
+        function mostrarVentas(ventas) {
+            const container = document.getElementById('ventas-historial');
+            if (!ventas.length) {
+                container.innerHTML = '<p class="text-muted">No hay ventas registradas.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Productos</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${ventas.map(venta => {
+                                const fecha = new Date(venta.createdAt).toLocaleString('es-PE');
+                                const items = venta.productos.map(item => {
+                                    const nombreProducto = item.producto_id?.nombre || 'Producto eliminado';
+                                    return `${item.cantidad} x ${nombreProducto}`;
+                                }).join(', ');
+                                return `
+                                    <tr>
+                                        <td>${fecha}</td>
+                                        <td>${items}</td>
+                                        <td>S/ ${venta.total_venta.toFixed(2)}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        async function cargarAlertas() {
+            try {
+                const response = await fetch(`${API_BASE}/productos/alertas`);
+                const alertas = await response.json();
+                mostrarAlertas(alertas);
+            } catch (error) {
+                console.error('Error cargando alertas:', error);
+            }
+        }
+
+        function mostrarAlertas(alertas) {
+            const container = document.getElementById('alertas');
+            const lista = document.getElementById('lista-alertas');
+            if (alertas.length > 0) {
+                lista.innerHTML = alertas.map(a => `<li>${a.nombre}: ${a.stock_actual} unidades (mínimo: ${a.stock_minimo})</li>`).join('');
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        document.getElementById('form-producto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const producto = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                precio: parseFloat(document.getElementById('precio').value),
+                stock_actual: parseInt(document.getElementById('stock_actual').value),
+                stock_minimo: parseInt(document.getElementById('stock_minimo').value)
+            };
+            const id = document.getElementById('producto_id').value;
+            const url = id ? `${API_BASE}/productos/${id}` : `${API_BASE}/productos`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(producto)
+                });
+                if (response.ok) {
+                    cargarProductos();
+                    cargarAlertas();
+                    bootstrap.Modal.getInstance(document.getElementById('modalProducto')).hide();
+                    document.getElementById('form-producto').reset();
+                    document.getElementById('producto_id').value = '';
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.msg || error.message || 'No se pudo guardar el producto'));
+                }
+            } catch (error) {
+                console.error('Error guardando producto:', error);
+            }
+        });
+
+        async function editarProducto(id) {
+            try {
+                const response = await fetch(`${API_BASE}/productos/${id}`);
+                const producto = await response.json();
+                document.getElementById('nombre').value = producto.nombre;
+                document.getElementById('descripcion').value = producto.descripcion || '';
+                document.getElementById('precio').value = producto.precio;
+                document.getElementById('stock_actual').value = producto.stock_actual;
+                document.getElementById('stock_minimo').value = producto.stock_minimo;
+                document.getElementById('producto_id').value = producto._id;
+                const modal = new bootstrap.Modal(document.getElementById('modalProducto'));
+                modal.show();
+            } catch (error) {
+                console.error('Error cargando producto:', error);
+            }
+        }
+
+        async function eliminarProducto(id) {
+            console.log('Eliminar producto:', id);
+            if (!confirm('¿Deseas eliminar este producto?')) return;
+            try {
+                const response = await fetch(`${API_BASE}/productos/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    cargarProductos();
+                    cargarAlertas();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.msg || error.message || 'No se pudo eliminar el producto'));
+                }
+            } catch (error) {
+                console.error('Error eliminando producto:', error);
+            }
+        }
+
+        function mostrarProductosVenta(productos) {
+            const container = document.getElementById('productos-venta');
+            container.innerHTML = '<h6>Seleccionar productos para vender:</h6>';
+            productos.forEach(producto => {
+                if (producto.stock_actual > 0) {
+                    const div = document.createElement('div');
+                    div.className = 'd-flex align-items-center mb-2';
+                    div.innerHTML = `
+                        <input type="checkbox" class="form-check-input me-2 venta-checkbox" data-id="${producto._id}" data-precio="${producto.precio}" data-stock="${producto.stock_actual}">
+                        <label class="form-check-label me-2">${producto.nombre} (S/ ${producto.precio}) - Stock: ${producto.stock_actual}</label>
+                        <input type="number" class="form-control venta-cantidad" data-id="${producto._id}" placeholder="Cant." min="1" max="${producto.stock_actual}" style="width: 80px;" disabled>
+                    `;
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('venta-checkbox')) {
+                const cantidadInput = document.querySelector(`.venta-cantidad[data-id="${e.target.dataset.id}"]`);
+                cantidadInput.disabled = !e.target.checked;
+                if (!e.target.checked) cantidadInput.value = '';
+            }
+        });
+
+        document.getElementById('btn-procesar-venta').addEventListener('click', async () => {
+            const productosSeleccionados = [];
+            document.querySelectorAll('.venta-checkbox:checked').forEach(checkbox => {
+                const id = checkbox.dataset.id;
+                const precio = parseFloat(checkbox.dataset.precio);
+                const cantidadInput = document.querySelector(`.venta-cantidad[data-id="${id}"]`);
+                const cantidad = parseInt(cantidadInput.value);
+                if (cantidad > 0) {
+                    productosSeleccionados.push({ producto_id: id, cantidad, precio_unitario: precio });
+                }
+            });
+
+            if (productosSeleccionados.length === 0) {
+                alert('Selecciona al menos un producto y cantidad.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/ventas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productos: productosSeleccionados })
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Venta procesada exitosamente! Total: S/ ${result.venta.total_venta}`);
+                    cargarProductos();
+                    cargarAlertas();
+                    cargarVentas();
+                    document.querySelectorAll('.venta-checkbox').forEach(cb => cb.checked = false);
+                    document.querySelectorAll('.venta-cantidad').forEach(inp => { inp.value = ''; inp.disabled = true; });
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.msg || error.message || 'Error al procesar la venta'));
+                }
+            } catch (error) {
+                console.error('Error procesando venta:', error);
+                alert('Error al procesar la venta.');
+            }
+        });
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('authToken');
+            mostrarAuth();
+        }
+    </script>
+</body>
+</html>
